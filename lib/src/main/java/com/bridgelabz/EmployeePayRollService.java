@@ -106,4 +106,11 @@ public class EmployeePayRollService {
 		return null;
 
 	}
+
+	public java.util.Map<String, Double> readAvgSalaryByGender(IOService ioService) throws EmployeePayrollException {
+		if (ioService.equals(ioService.DB_IO)) {
+			return employeePayRollDBService.getAvgSalaryByGender();
+		}
+		return null;
+	}
 }

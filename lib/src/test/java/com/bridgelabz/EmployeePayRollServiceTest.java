@@ -33,24 +33,34 @@ class EmployeePayRollServiceTest {
 		List<EmployeePayRollData> empPayRollData = employeePayRollService.readEmployeePayroll(IOService.DB_IO);
 		Assertions.assertEquals(4, empPayRollData.size());
 	}
-	
+
 	@Test
 	public void givenNewSalaryForEmployeeWhenUpdatedShouldMatch() throws EmployeePayrollException {
 		EmployeePayRollService employeePayRollService = new EmployeePayRollService();
 		List<EmployeePayRollData> empPayRollData = employeePayRollService.readEmployeePayroll(IOService.DB_IO);
-		employeePayRollService.updateEmployeeSalary("Terisa",300000.00);
+		employeePayRollService.updateEmployeeSalary("Terisa", 300000.00);
 		boolean result = employeePayRollService.checkEmployeePayRollSyncWithDataBase("Terisa");
 		Assertions.assertFalse(result);
 	}
-	
+
 	@Test
 	public void givenDateRangeWhenRetrivedShouldMatchEmployeeCount() throws EmployeePayrollException {
 		EmployeePayRollService employeePayRollService = new EmployeePayRollService();
 		employeePayRollService.readEmployeePayroll(IOService.DB_IO);
 		LocalDate startDate = LocalDate.of(2018, 01, 01);
 		LocalDate endDate = LocalDate.now();
-		List<EmployeePayRollData> empPayRollData = employeePayRollService.readEmployeePayRollForDateRange(IOService.DB_IO,startDate,endDate);
+		List<EmployeePayRollData> empPayRollData = employeePayRollService
+				.readEmployeePayRollForDateRange(IOService.DB_IO, startDate, endDate);
 		Assertions.assertEquals(3, empPayRollData.size());
+	}
+
+	@Test
+	public void givenPayRollDataWhenAvgSalaryRetrievedGenderShouldReturnProperValue() throws EmployeePayrollException {
+		EmployeePayRollService employeePayRollService = new EmployeePayRollService();
+		employeePayRollService.readEmployeePayroll(IOService.DB_IO);
+		Map<String, Double> avgSalaryByGender = employeePayRollService.readAvgSalaryByGender(IOService.DB_IO);
+		Assertions.assertFalse(
+				avgSalaryByGender.get("M").equals(500000.0) && avgSalaryByGender.get("F").equals(300000.0));
 	}
 
 }
