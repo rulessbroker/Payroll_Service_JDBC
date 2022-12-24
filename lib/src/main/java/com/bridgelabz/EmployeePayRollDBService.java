@@ -116,12 +116,13 @@ public class EmployeePayRollDBService {
 
 	public List<EmployeePayRollData> getEmployeePayRollForDateRange(LocalDate startDate, LocalDate endDate)
 			throws EmployeePayrollException {
-		String sql = String.format("select * from payroll_service where start between cast('%s' as date) AND date('%s');",
+		String sql = String.format(
+				"select * from payroll_service where start between cast('%s' as date) AND date('%s');",
 				Date.valueOf(startDate), Date.valueOf(endDate));
 
 		return this.getEmployeePayRollDataUsingDB(sql);
 	}
-	
+
 	public Map<String, Double> getAvgSalaryByGender() throws EmployeePayrollException {
 		String sql = "select gender,avg(salary) as avgsalary from payroll_service group by gender";
 		Map<String, Double> genderToAvgSalaryMap = new HashMap<>();
@@ -129,19 +130,51 @@ public class EmployeePayRollDBService {
 			Connection con = this.getConnection();
 			java.sql.Statement stmt = con.createStatement();
 			ResultSet result = stmt.executeQuery(sql);
-			while(result.next()) {
+			while (result.next()) {
 				String gender = result.getString("gender");
 				double salary = result.getDouble("avgsalary");
 				genderToAvgSalaryMap.put(gender, salary);
-				
+
 			}
-		}
-		catch (SQLException e) {
-			// TODO Auto-generated catch block
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
-		
 		return genderToAvgSalaryMap;
+	}
+
+	public EmployeePayRollData addEmployeePayRoll(String name, double salary, LocalDate startDate, String gender)
+			throws EmployeePayrollException {
+		Connection connection = null;
+		try {
+			connection = this.getConnection();
+		} catch (SQLException e2) {
+			e2.printStackTrace();
+		}
+		int employeeId = -1;
+		EmployeePayRollData employeePayRollData = null;
+		String sql = String.format(
+				"Insert into employee_payroll (name,gender, salary,startDate) values" + "('%s','%s',%s,'%s')", name,
+				gender, salary, Date.valueOf(startDate));
+		try {
+
+			java.sql.Statement stmt = connection.createStatement();
+			connection.setAutoCommit(false);
+			int rowAffected = stmt.executeUpdate(sql, stmt.RETURN_GENERATED_KEYS);
+			if (rowAffected == 1) {
+				ResultSet resultSet = stmt.getGeneratedKeys();
+				if (resultSet.next()) {
+					employeeId = resultSet.getInt(1);
+				}
+			}
+			employeePayRollData = new EmployeePayRollData(employeeId, name, salary, startDate);
+		} catch (SQLException e) {
+			try {
+				connection.rollback();
+				return employeePayRollData;
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+		}
+		return employeePayRollData;
 	}
 }

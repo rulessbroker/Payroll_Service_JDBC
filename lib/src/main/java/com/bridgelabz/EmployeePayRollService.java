@@ -3,6 +3,7 @@ package com.bridgelabz;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class EmployeePayRollService {
@@ -107,10 +108,16 @@ public class EmployeePayRollService {
 
 	}
 
-	public java.util.Map<String, Double> readAvgSalaryByGender(IOService ioService) throws EmployeePayrollException {
+	public Map<String, Double> readAvgSalaryByGender(IOService ioService) throws EmployeePayrollException {
 		if (ioService.equals(ioService.DB_IO)) {
 			return employeePayRollDBService.getAvgSalaryByGender();
 		}
 		return null;
+	}
+
+	public void addEmployeePayroll(String name, double salary, LocalDate startDate, String gender)
+			throws EmployeePayrollException {
+		employeePayRollList.add(employeePayRollDBService.addEmployeePayRoll(name, salary, startDate, gender));
+
 	}
 }
