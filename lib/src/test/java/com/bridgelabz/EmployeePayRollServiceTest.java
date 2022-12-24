@@ -12,9 +12,9 @@ class EmployeePayRollServiceTest {
 
 	@Test
 	public void givenThreeEmployeesWritenToFile() {
-		EmployeePayRollData[] empdata = { new EmployeePayRollData(1, "Ram", 1000),
-				new EmployeePayRollData(2, "Shyam", 1000), new EmployeePayRollData(3, "Krishna", 1000),
-				new EmployeePayRollData(4, "Parshu", 1000) };
+		EmployeePayRollData[] empdata = { new EmployeePayRollData(1, "Bill", 1000000),
+				new EmployeePayRollData(2, "Mark", 2000000), new EmployeePayRollData(3, "Charlie", 3000000),
+				new EmployeePayRollData(4, "Terisa", 1000000) };
 		EmployeePayRollService employeePayRollService;
 
 		employeePayRollService = new EmployeePayRollService(Arrays.asList(empdata));
@@ -31,5 +31,16 @@ class EmployeePayRollServiceTest {
 		List<EmployeePayRollData> empPayRollData = employeePayRollService.readEmployeePayroll(IOService.DB_IO);
 		Assertions.assertEquals(4, empPayRollData.size());
 	}
+	
+	@Test
+	public void givenNewSalaryForEmployeeWhenUpdatedShouldMatch() throws EmployeePayrollException {
+		EmployeePayRollService employeePayRollService = new EmployeePayRollService();
+		List<EmployeePayRollData> empPayRollData = employeePayRollService.readEmployeePayroll(IOService.DB_IO);
+		employeePayRollService.updateEmployeeSalary("Terisa",300000.00);
+		boolean result = employeePayRollService.checkEmployeePayRollSyncWithDataBase("Terisa");
+		Assertions.assertFalse(result);
+	}
+	
+	
 
 }

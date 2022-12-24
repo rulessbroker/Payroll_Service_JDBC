@@ -1,6 +1,7 @@
 package com.bridgelabz;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,7 +16,7 @@ public class EmployeePayRollDBService {
 	private static EmployeePayRollDBService employeePayRollDBService;
 	private PreparedStatement employeepayRollDataStatement;
 
-	Connection getConnection() throws EmployeePayrollException, SQLException{
+	Connection getConnection() throws EmployeePayrollException, SQLException {
 		Connection connection;
 		String jdbcUrl = "jdbc:mysql://localhost:3306/payroll_service?characterEncoding=utf8";
 		String userName = "root";
@@ -68,30 +69,54 @@ public class EmployeePayRollDBService {
 		}
 		return employeePayROllData;
 	}
-	
+
 	public List<EmployeePayRollData> getEmployeePayRollData(String name) throws EmployeePayrollException {
-		List<EmployeePayRollData> employeePayROllData =null;
-		if(this.employeepayRollDataStatement == null)	
-	      this.prepareStatementForEmployeeData();
+		List<EmployeePayRollData> employeePayROllData = null;
+		if (this.employeepayRollDataStatement == null)
+			this.prepareStatementForEmployeeData();
 		try {
 			employeepayRollDataStatement.setString(1, name);
 			ResultSet resultSet = employeepayRollDataStatement.executeQuery();
 			employeePayROllData = this.getEmployeePayRollData(resultSet);
-		}
-		catch(SQLException e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return employeePayROllData;
 	}
-	
+
 	private void prepareStatementForEmployeeData() throws EmployeePayrollException {
 		try {
 			Connection con = this.getConnection();
 			String sql = "select * from employee_payroll where name = ?";
-			employeepayRollDataStatement =  con.prepareStatement(sql);
-		}
-		catch(SQLException e) {
+			employeepayRollDataStatement = con.prepareStatement(sql);
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public int updateEmployeeData(String name, double salary) throws EmployeePayrollException {
+		return this.updateEmployeeDataUsingStatement(name, salary);
+	}
+
+	private int updateEmployeeDataUsingStatement(String name, double salary) throws EmployeePayrollException {
+		int result = 0;
+		String sql = String.format("update employee_payroll set salary = %.2f where name = '%s'", salary, name);
+		try {
+			Connection con = this.getConnection();
+			java.sql.Statement stmt = con.createStatement();
+			result = stmt.executeUpdate(sql);
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	public List<EmployeePayRollData> getEmployeePayRollForDateRange(LocalDate startDate, LocalDate endDate)
+			throws EmployeePayrollException {
+		String sql = String.format("select * from employee_payroll where StartDate between '%s' AND '%s';",
+				Date.valueOf(startDate), Date.valueOf(endDate));
+
+		return this.getEmployeePayRollDataUsingDB(sql);
 	}
 }
